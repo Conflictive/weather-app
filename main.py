@@ -7,6 +7,9 @@ load_dotenv()
 # Get API Key from .env file 
 API_KEY = os.getenv("API_KEY")
 
+if not API_KEY:
+    raise ValueError("API_KEY not found in .env file. Please check your setup.")
+
 class WeatherClient():
     # Base url for geocode api calls
     location_url = 'http://api.openweathermap.org/geo/1.0/direct'
@@ -14,30 +17,19 @@ class WeatherClient():
     # Base url for weather api calls
     weather_url = 'https://api.openweathermap.org/data/2.5/weather'
 
-    # Params required by geocode api call 
-    location_params = {
-        'q': None, 
-        'limit': 1, 
-        'appid': API_KEY
-    }
-
-    # Params required for weather api call
-    weather_params = {
-        'lat': None, 
-        'long': None, 
-        'appid': API_KEY,
-        'units': 'metric'
-    }
-
     @classmethod
     def get_location(cls, location):
         
         # Set location param to given city 
-        cls.location_params['q'] = location
+        location_params = {
+            'q': location, 
+            'limit': 1, 
+            'appid': API_KEY
+        }
 
         try:
             # Send API call for given city - stores result as a list of dictionaries
-            location_request = requests.get(cls.location_url, params=cls.location_params, timeout=5)
+            location_request = requests.get(cls.location_url, params=location_params, timeout=5)
             
             # Check for error status codes
             location_request.raise_for_status()
@@ -50,68 +42,72 @@ class WeatherClient():
             lat = location_data['lat']
             lon = location_data['lon']
 
+            return (lat, lon)
+
         except requests.exceptions.Timeout:
             print("Error: The request timed out.")
-
+            return None
         except requests.exceptions.HTTPError as e:
             print(f"Error: A server error occurred: {e}")
-
+            return None
         except requests.exceptions.ConnectionError:
             print("Error: Could not connect to the server. Check your internet.")
-
+            return None
         except json.JSONDecodeError:
             print("Error: Failed to decode the server's response.")
-
+            return None
         except (IndexError, KeyError):
             print("Error: Could not find location data in the response.")
-
+            return None
         except Exception as e:
             print(f"An unknown error occurred: {e}")
-                    
-        return (lat, lon)
-    
+            return None     
+        
     @classmethod 
     def get_weather(cls, coords):
         
+        lat, lon = coords
+        
         # Configure weather params
-        cls.weather_params['lat'] = coords[0]
-        cls.weather_params['lon'] = coords[1]
+        weather_params = {
+            'lat': lat, 
+            'lon': lon, 
+            'appid': API_KEY,
+            'units': 'metric'
+        }
 
         try:
-            weather_request = requests.get(cls.weather_url, cls.weather_params, timeout=5)
+            weather_request = requests.get(cls.weather_url, params=weather_params, timeout=5)
 
             weather_request.raise_for_status()
 
             weather_response = weather_request.json()
+
+            print(f"The temperature in {weather_response['name']}, {weather_response['sys']['country']} is {int(weather_response['main']['temp'])}°C")
         except requests.exceptions.Timeout:
             print("Error: The request timed out.")
-
         except requests.exceptions.HTTPError as e:
             print(f"Error: A server error occurred: {e}")
-
         except requests.exceptions.ConnectionError:
             print("Error: Could not connect to the server. Check your internet.")
-
         except json.JSONDecodeError:
             print("Error: Failed to decode the server's response.")
-
         except (IndexError, KeyError):
             print("Error: Could not find location data in the response.")
-
         except Exception as e:
             print(f"An unknown error occurred: {e}")
 
-        print(f"The temperature in {weather_response['name']}, {weather_response['sys']['country']} is {int(weather_response['main']['temp'])}°C")
-
-
 if __name__ == "__main__":
-    
-    weather_client = WeatherClient()
-    
+
     while True:
-        city = input('Enter a city: ')
+        city = input('Enter a city (or "q" to quit): ')
+        if city.lower() == 'q':
+            break
         
-        weather_client.get_weather(weather_client.get_location(city))
+        coords = WeatherClient.get_location(city)
+        
+        if coords:
+            WeatherClient.get_weather(coords)
     
 
 
