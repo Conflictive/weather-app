@@ -26,7 +26,7 @@ class WeatherClient():
         location_params = {
             'q': location, 
             'limit': 1, 
-            'appid': API_KEY
+            'appid': self.api_key
         }
 
         try:
@@ -75,7 +75,7 @@ class WeatherClient():
         weather_params = {
             'lat': lat, 
             'lon': lon, 
-            'appid': API_KEY,
+            'appid': self.api_key,
             'units': 'metric'
         }
 
