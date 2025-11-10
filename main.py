@@ -15,13 +15,13 @@ class WeatherClient():
 
     # Params required by geocode api call 
     location_params = {
-        'q': 'London', 
+        'q': None, 
         'limit': 1, 
         'appid': API_KEY
     }
 
     # Params required for weather api call
-    location_params = {
+    weather_params = {
         'lat': None, 
         'long': None, 
         'appid': API_KEY
@@ -39,10 +39,21 @@ class WeatherClient():
         # Get dictionary from the list
         location_data = location_response[0]
 
-        # Store latitude data from API call
         lat = location_data['lat']
         lon = location_data['lon']
+
+        return (lat, lon)
+    
+    @classmethod 
+    def get_weather(cls, coords):
         
+        # Configure weather params
+        cls.weather_params['lat'] = coords[0]
+        cls.weather_params['lon'] = coords[1]
+
+        weather_response = requests.get(cls.weather_url, cls.weather_params).json()
+
+        return weather_response
 
 
 if __name__ == "__main__":
@@ -51,7 +62,7 @@ if __name__ == "__main__":
 
     city = input('Enter a city: ')
     
-    weather_client.get_location(city)
+    weather_client.get_weather(weather_client.get_location(city))
     
 
 
