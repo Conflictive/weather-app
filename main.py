@@ -108,10 +108,10 @@ if __name__ == "__main__":
     
     weather_client = WeatherClient()
     
-    
-    city = input('Enter a city: ')
-    
-    weather_client.get_weather(weather_client.get_location(city))
+    while True:
+        city = input('Enter a city: ')
+        
+        weather_client.get_weather(weather_client.get_location(city))
     
 
 
