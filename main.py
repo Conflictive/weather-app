@@ -54,7 +54,7 @@ class WeatherClient():
 
         weather_response = requests.get(cls.weather_url, cls.weather_params).json()
 
-        print(weather_response['main']['temp'])
+        print(f"The temperature in {cls.location_params['q']} is {weather_response['main']['temp']}°C")
 
 
 if __name__ == "__main__":
