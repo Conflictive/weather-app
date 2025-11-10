@@ -17,8 +17,10 @@ class WeatherClient():
     # Base url for weather api calls
     weather_url = 'https://api.openweathermap.org/data/2.5/weather'
 
-    @classmethod
-    def get_location(cls, location):
+    def __init__(self, api_key):
+        self.api_key = api_key
+
+    def get_location(self, location):
         
         # Set location param to given city 
         location_params = {
@@ -29,7 +31,7 @@ class WeatherClient():
 
         try:
             # Send API call for given city - stores result as a list of dictionaries
-            location_request = requests.get(cls.location_url, params=location_params, timeout=5)
+            location_request = requests.get(self.location_url, params=location_params, timeout=5)
             
             # Check for error status codes
             location_request.raise_for_status()
@@ -65,8 +67,7 @@ class WeatherClient():
             print(f"An unknown error occurred: {e}")
             return None     
         
-    @classmethod 
-    def get_weather(cls, coords):
+    def get_weather(self, coords):
         
         lat, lon, name, country = coords
         
@@ -79,7 +80,7 @@ class WeatherClient():
         }
 
         try:
-            weather_request = requests.get(cls.weather_url, params=weather_params, timeout=5)
+            weather_request = requests.get(self.weather_url, params=weather_params, timeout=5)
 
             weather_request.raise_for_status()
 
@@ -101,15 +102,17 @@ class WeatherClient():
 
 if __name__ == "__main__":
 
+    client = WeatherClient(API_KEY)
+    
     while True:
         city = input('Enter a city (or "q" to quit): ')
         if city.lower() == 'q':
             break
         
-        coords = WeatherClient.get_location(city)
+        coords = client.get_location(city)
         
         if coords:
-            WeatherClient.get_weather(coords)
+            client.get_weather(coords)
     
 
 
