@@ -101,13 +101,14 @@ class WeatherClient():
         except Exception as e:
             print(f"An unknown error occurred: {e}")
 
-        print(f"The temperature in {cls.location_params['q']} is {int(weather_response['main']['temp'])}°C")
+        print(f"The temperature in {weather_response['name']}, {weather_response['sys']['country']} is {int(weather_response['main']['temp'])}°C")
 
 
 if __name__ == "__main__":
     
     weather_client = WeatherClient()
-
+    
+    
     city = input('Enter a city: ')
     
     weather_client.get_weather(weather_client.get_location(city))
