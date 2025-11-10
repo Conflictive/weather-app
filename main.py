@@ -41,8 +41,10 @@ class WeatherClient():
 
             lat = location_data['lat']
             lon = location_data['lon']
+            found_name = location_data['name']
+            found_country = location_data['country']
 
-            return (lat, lon)
+            return (lat, lon, found_name, found_country)
 
         except requests.exceptions.Timeout:
             print("Error: The request timed out.")
@@ -66,7 +68,7 @@ class WeatherClient():
     @classmethod 
     def get_weather(cls, coords):
         
-        lat, lon = coords
+        lat, lon, name, country = coords
         
         # Configure weather params
         weather_params = {
@@ -83,7 +85,7 @@ class WeatherClient():
 
             weather_response = weather_request.json()
 
-            print(f"The temperature in {weather_response['name']}, {weather_response['sys']['country']} is {int(weather_response['main']['temp'])}°C")
+            print(f"The temperature in {name}, {country} is {int(weather_response['main']['temp'])}°C")
         except requests.exceptions.Timeout:
             print("Error: The request timed out.")
         except requests.exceptions.HTTPError as e:
