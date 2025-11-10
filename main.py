@@ -24,7 +24,8 @@ class WeatherClient():
     weather_params = {
         'lat': None, 
         'long': None, 
-        'appid': API_KEY
+        'appid': API_KEY,
+        'units': 'metric'
     }
 
     @classmethod
@@ -53,7 +54,7 @@ class WeatherClient():
 
         weather_response = requests.get(cls.weather_url, cls.weather_params).json()
 
-        return weather_response
+        print(weather_response['main']['temp'])
 
 
 if __name__ == "__main__":
