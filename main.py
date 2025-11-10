@@ -37,10 +37,12 @@ class WeatherClient():
 
         try:
             # Send API call for given city - stores result as a list of dictionaries
-            location_response = requests.get(cls.location_url, params=cls.location_params, timeout=5).json()
+            location_request = requests.get(cls.location_url, params=cls.location_params, timeout=5)
             
             # Check for error status codes
-            location_response.raise_for_status()
+            location_request.raise_for_status()
+
+            location_response = location_request.json()
 
             # Get dictionary from the list
             location_data = location_response[0]
@@ -76,7 +78,11 @@ class WeatherClient():
         cls.weather_params['lon'] = coords[1]
 
         try:
-            weather_response = requests.get(cls.weather_url, cls.weather_params, timeout=5).json()
+            weather_request = requests.get(cls.weather_url, cls.weather_params, timeout=5)
+
+            weather_request.raise_for_status()
+
+            weather_response = weather_request.json()
         except requests.exceptions.Timeout:
             print("Error: The request timed out.")
 
