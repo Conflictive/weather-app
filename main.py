@@ -1,5 +1,6 @@
 import os
 import requests
+import json
 from dotenv import load_dotenv
 
 load_dotenv() 
@@ -34,15 +35,37 @@ class WeatherClient():
         # Set location param to given city 
         cls.location_params['q'] = location
 
-        # Send API call for given city - stores result as a list of dictionaries
-        location_response = requests.get(cls.location_url, params=cls.location_params).json()
+        try:
+            # Send API call for given city - stores result as a list of dictionaries
+            location_response = requests.get(cls.location_url, params=cls.location_params, timeout=5).json()
+            
+            # Check for error status codes
+            location_response.raise_for_status()
 
-        # Get dictionary from the list
-        location_data = location_response[0]
+            # Get dictionary from the list
+            location_data = location_response[0]
 
-        lat = location_data['lat']
-        lon = location_data['lon']
+            lat = location_data['lat']
+            lon = location_data['lon']
 
+        except requests.exceptions.Timeout:
+            print("Error: The request timed out.")
+
+        except requests.exceptions.HTTPError as e:
+            print(f"Error: A server error occurred: {e}")
+
+        except requests.exceptions.ConnectionError:
+            print("Error: Could not connect to the server. Check your internet.")
+
+        except json.JSONDecodeError:
+            print("Error: Failed to decode the server's response.")
+
+        except (IndexError, KeyError):
+            print("Error: Could not find location data in the response.")
+
+        except Exception as e:
+            print(f"An unknown error occurred: {e}")
+                    
         return (lat, lon)
     
     @classmethod 
@@ -52,9 +75,27 @@ class WeatherClient():
         cls.weather_params['lat'] = coords[0]
         cls.weather_params['lon'] = coords[1]
 
-        weather_response = requests.get(cls.weather_url, cls.weather_params).json()
+        try:
+            weather_response = requests.get(cls.weather_url, cls.weather_params, timeout=5).json()
+        except requests.exceptions.Timeout:
+            print("Error: The request timed out.")
 
-        print(f"The temperature in {cls.location_params['q']} is {weather_response['main']['temp']}°C")
+        except requests.exceptions.HTTPError as e:
+            print(f"Error: A server error occurred: {e}")
+
+        except requests.exceptions.ConnectionError:
+            print("Error: Could not connect to the server. Check your internet.")
+
+        except json.JSONDecodeError:
+            print("Error: Failed to decode the server's response.")
+
+        except (IndexError, KeyError):
+            print("Error: Could not find location data in the response.")
+
+        except Exception as e:
+            print(f"An unknown error occurred: {e}")
+
+        print(f"The temperature in {cls.location_params['q']} is {int(weather_response['main']['temp'])}°C")
 
 
 if __name__ == "__main__":
